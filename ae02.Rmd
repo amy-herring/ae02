@@ -1,0 +1,59 @@
+---
+title: "Life Expectancy"
+author: "Amy Herring"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    toc: yes
+    toc_float: yes
+---
+
+## Introduction
+
+How has life expectancy from infancy changed over time around the world?
+
+
+
+```{r load-packages, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(infer)
+```
+
+## Data
+
+The CDC births data for 2020 are special because they (theoretically, at least) contain data on *all* US births. Typically, we are not so fortunate as to have a census of the entire population, and we then work with a sample (often ideally a *random sample*) from the population, in order to learn about the full population.
+
+```{r readdata}
+load("/data/natus2020.RData") 
+
+natus2020 %>%
+  summarize(meanbwt=mean(bwt),n=n())
+```
+
+The mean birth weight in these data, over all 3,613,647 births in 2020, is 3261 g.
+
+## Taking a sample and calculating summaries
+
+In this exercise, we will take *random samples* from the full population of size 1000. Each random sample might represent a good-sized scientific study of birth weight with participants recruited from all 2020 US babies. Then in each study, we will calculate the sample mean birth weight and a 95% confidence interval for it.
+
+First, you will need to set the seed so you can reproduce your random sample. This seed can be any number you like. Change the seed from the number presented below.
+
+Then, we can calculate the mean birth weight in our sample, along with a 95% confidence interval using the t-distribution.
+
+```{r randomsample}
+set.seed(121372)
+amystudy <- natus2020 %>% 
+  sample_n(1000) 
+
+amystudy %>%
+  summarize(meanbwt=mean(bwt))
+
+amystudy %>%
+  t_test(response=bwt)
+
+```
+
+In my sample, the estimated mean birth weight is 3254 g with a 95% CI of (3212, 3295) grams. This confidence interval does cover the true mean of 3261g. What do you get?
+
+Note: the p-value here is for the very silly test of the null hypothesis that the mean birth weight is zero. We could change that default value in the null hypothesis if desired.
+
